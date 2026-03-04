@@ -259,46 +259,75 @@ class HybridSkillUpdater:
             return "Changed"
 
     def extract_key_info(self, pr: dict) -> str:
-        """提取关键信息"""
+        """Extract key information from PR"""
         body = pr.get("body", "")
         title = pr["title"]
 
-        # 简单提取：从body中提取前3行
-        lines = [l.strip() for l in body.split("\n") if l.strip() and not l.startswith("#")][:3]
+        # Extract first 3 meaningful lines
+        lines = []
+        for line in body.split("\n"):
+            line = line.strip()
+
+            # Skip empty lines
+            if not line:
+                continue
+
+            # Skip headers
+            if line.startswith("#"):
+                continue
+
+            # Skip markdownlint comments
+            if "<!-- markdownlint-" in line:
+                continue
+
+            # Skip placeholder text
+            if "PLEASE FILL IN" in line:
+                continue
+
+            # Skip checkbox items (empty ones)
+            if line.startswith("- [ ]") and not any(c.isalpha() for c in line[6:]):
+                continue
+
+            lines.append(line)
+
+            # Stop after 3 good lines
+            if len(lines) >= 3:
+                break
 
         if lines:
             return "\n".join([f"- {l}" for l in lines])
         else:
+            # Fallback to title if no good lines found
             return f"- {re.sub(r'\[.*?\]', '', title).strip()}"
 
     def extract_model_info(self, pr: dict) -> dict | None:
-        """从PR中提取模型信息"""
-        # TODO: 实现智能提取
+        """Extract model information from PR"""
+        # TODO: Implement intelligent extraction
         return None
 
     def generate_example(self, pr: dict) -> str | None:
-        """从PR生成示例代码"""
-        # TODO: 实现示例生成
+        """Generate example code from PR"""
+        # TODO: Implement example generation
         return None
 
     def generate_troubleshooting_note(self, pr: dict) -> str | None:
-        """生成troubleshooting note"""
-        # TODO: 实现troubleshooting note生成
+        """Generate troubleshooting note"""
+        # TODO: Implement troubleshooting note generation
         return None
 
     def update_model_table(self, content: str, model_info: dict) -> str:
-        """更新模型表格"""
-        # TODO: 实现表格更新
+        """Update model table"""
+        # TODO: Implement table update
         return content
 
     def add_example_section(self, content: str, example: str) -> str:
-        """添加示例"""
-        # TODO: 实现示例添加
+        """Add example section"""
+        # TODO: Implement example addition
         return content
 
     def add_troubleshooting_note(self, content: str, note: str) -> str:
-        """添加troubleshooting note"""
-        # TODO: 实现note添加
+        """Add troubleshooting note"""
+        # TODO: Implement note addition
         return content
 
     def create_updates_file(self, updates_file: Path, skill_name: str):

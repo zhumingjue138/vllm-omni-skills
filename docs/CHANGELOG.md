@@ -2,10 +2,10 @@
 
 All notable changes to vllm-omni-skills will be documented in this file.
 
-格式基于 [Keep a Changelog](https://keepachangelog.com/),
-本项目遵循 [Semantic Versioning](https://semver.org/).
+Format based on [Keep a Changelog](https://keepachangelog.com/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
 
-**归档周期**: 每4周归档一次（对应vllm-omni的release周期）
+**Archive Cycle**: Archived every 4 weeks (aligned with vllm-omni release cycle)
 
 ---
 
@@ -47,21 +47,21 @@ All notable changes to vllm-omni-skills will be documented in this file.
 ### Fixed
 - 23 bug fixes across all skills
 
-[查看详细更新](updates/)
+[View detailed updates](updates/)
 
 ---
 
-## 版本说明
+## Version Notes
 
-- **Added**: 新增功能
-- **Changed**: 现有功能的变更
-- **Fixed**: Bug修复
-- **Performance**: 性能优化
-- **Documentation**: 文档更新
+- **Added**: New features
+- **Changed**: Changes to existing functionality
+- **Fixed**: Bug fixes
+- **Performance**: Performance optimizations
+- **Documentation**: Documentation updates
 
 ---
 
-## 按Skill查看
+## View by Skill
 
 - [Image Generation](updates/image-gen.md)
 - [Video Generation](updates/video-gen.md)
@@ -74,5 +74,5 @@ All notable changes to vllm-omni-skills will be documented in this file.
 
 ---
 
-*最后更新: 2026-03-04*
-*下次归档: 2026-04-01 (vllm-omni release)*
+*Last updated: 2026-03-04*
+*Next archive: 2026-04-01 (vllm-omni release)*

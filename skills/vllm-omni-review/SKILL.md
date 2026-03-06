@@ -58,11 +58,30 @@ Check PR title prefix against the table below. If domain-specific context is nee
 - Diff content is unclear without domain context
 - Domain-specific validation needed (e.g., model architecture, API contract)
 - Performance claims need verification
+- **Change affects a specialized subsystem** (CPU offloading, tensor parallelism, diffusion sampling, quantization methods)
+- **Even if PR provides benchmark data**, invoke skill when the change is in a specialized area
 
 **When NOT to invoke:**
 - Simple refactors with clear intent
 - Documentation-only changes
 - Already have sufficient context from diff
+- PR touches only one subsystem with obvious changes
+
+### Multi-Category PRs
+
+When a PR has multiple prefixes (e.g., `[Perf][Distributed]`):
+
+1. **Identify primary type** (first prefix usually indicates main intent)
+2. **Invoke primary skill first**
+3. **Use secondary skill for cross-cutting concerns:**
+
+| Scenario | Primary | Secondary |
+|----------|---------|----------|
+| `[Perf]` + `[Distributed]` | `vllm-omni-perf` | `vllm-omni-distributed` (check TP scaling) |
+| `[Perf]` + `[Model]` | `vllm-omni-perf` | `vllm-omni-contrib` (check model integration) |
+| `[Model]` + `[Quantization]` | `vllm-omni-contrib` | `vllm-omni-quantization` (check quality impact) |
+| `[Feature]` + `[API]` | `vllm-omni-api` | — (API skill usually sufficient) |
+| `[Distributed]` + `[Hardware]` | `vllm-omni-distributed` | `vllm-omni-hardware` (check backend compat) |
 
 ### Step 3: Run Red Flag Checks
 
@@ -74,9 +93,21 @@ Check PR title prefix against the table below. If domain-specific context is nee
 - [ ] Mixin after `nn.Module` with `__init__` setting attributes?
 - [ ] API changes without documentation?
 
-### Step 4: Check Common Pitfalls
+### Step 4: Check Pitfalls by Directory
 
-See [references/pitfalls.md](references/pitfalls.md) for known issues:
+Check pitfalls relevant to affected directories first:
+
+ then consult [references/pitfalls.md](references/pitfalls.md) for detailed explanations.
+
+| Affected Directory | Pitfalls to Check |
+|--------------------|-------------------|
+| `vllm_omni/engine/` | Scheduler state, pipeline coordination |
+| `vllm_omni/diffusion/` | Memory growth, generation quality |
+| `vllm_omni/connectors/` | Shared memory leaks, IPC issues |
+| `vllm_omni/stages/` | Stage lifecycle, config validation |
+| `vllm_omni/model_executor/` | Weight loading, device placement |
+| `vllm_omni/entrypoints/` | Input validation, error handling |
+| `*` (any) | MRO issues with mixins, async vs sync path differences |
 
 - MRO issues with mixins
 - Connector state management
@@ -96,6 +127,14 @@ gh api repos/vllm-project/vllm-omni/pulls/<pr_number>/reviews --input - <<EOF
 }
 EOF
 ```
+
+## Comment Phrasing Guidelines
+
+| PR State | Style |
+|----------|-------|
+| **Draft** | Ask questions, suggest alternatives: "Consider X for Y because..." |
+| **Ready** | Request changes: "Please address..." "This needs..." |
+| **Approved/In Progress** | Only comment if blocking: "Note: found issue at..." |
 
 ## Priority Order
 

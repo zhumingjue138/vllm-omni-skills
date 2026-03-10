@@ -4,7 +4,7 @@
 
 Quantization in `vllm-omni` is split:
 
-- AR and omni-model quantization follows upstream `vllm`
+- AR and omni-model quantization follow upstream `vllm`
 - diffusion quantization exists for selected DiT models through `fp8` and `gguf`
 
 ## Compatibility Matrix

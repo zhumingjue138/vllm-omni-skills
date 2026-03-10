@@ -42,7 +42,7 @@ Implementation rules:
 - Do not use `state_dict()` to discover GGUF loadable names; use `named_parameters()` and `named_buffers()`
 - Tensor-name mapping must be explicit per architecture
 - Do not rely on a fake generic fallback adapter
-- Guard fused QKV and KV rewrites so `.to_qkv.` or `.add_kv_proj.` are not rewritten twice
+- Guard fused QKV and KV rewrites so `to_qkv` or `add_kv_proj` are not rewritten twice
 - GGUF linear methods expect 2D input; flatten and restore shape around matmul
 - Prefer eager mode and `fp16` unless measurement says otherwise
 

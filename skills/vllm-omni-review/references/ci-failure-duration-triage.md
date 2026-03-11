@@ -6,7 +6,7 @@ When a user reports CI is **failing (red) / flaky / noticeably slower** and prov
 
 1. Focus only on the **first error** (the earliest fatal signal). Don’t get distracted by cascading follow-up errors.
 2. Extract: job name/level, the stage/step where the first error occurs, exit code/exception stack, whether it’s a timeout, and per-stage durations (if available).
-3. Classify into one of five categories: **build/install/deps**, **test failure**, **infrastructure/resources**, **timeout/performance regression**, **config/permissions/credentials**.
+3. Classify into one of five categories: **build/install**, **test failure**, **infrastructure**, **timeout/perf regression**, **config/environment**.
 4. Provide **1–3** root-cause hypotheses. Each must include an **exact log evidence excerpt**, and hypotheses must be ordered **from lowest verification cost to highest**.
 5. Provide a **≤5-minute** minimal verification for **Hypothesis 1** only. Specify **environment + commands + expected result** (must not require running the full pipeline).
 

@@ -396,6 +396,7 @@ Do NOT flag these as missing:
 - [Common Pitfalls](references/pitfalls.md) — MRO issues, connector state, async patterns
 - [Architecture](references/architecture.md) — System overview and critical paths
 - [Code Patterns](references/code-patterns.md) — Async, distributed, KV cache patterns
+- [CI Failure & Duration Triage](references/ci-failure-duration-triage.md) — First error extraction, duration anomalies, evidence-based hypotheses
 
 ## Quick Reference: What to Invoke When
 

@@ -19,15 +19,15 @@ When a user reports CI is **failing (red) / flaky / noticeably slower** and prov
 
 ## Decision tree (branch on the first error)
 
-- **Compile / build / dependency install failures**
+- **Build/install failures**
   - Common signals: `SyntaxError`, compiler `error:`, `ld:`/`linker`, `undefined reference`, `CMake Error`, `nvcc fatal`, `ModuleNotFoundError`, `ImportError`, `pip install` failures, `Failed building wheel`, `No matching distribution found`
-- **Test failures (assertions or exceptions inside tests)**
+- **Test failures**
   - Common signals: pytest `FAILED`, `AssertionError`, `E   assert ...`, traceback pointing to a `tests/...` line, or still failing after flaky retries
-- **Infrastructure / resource issues (non-product logic)**
+- **Infrastructure issues**
   - Common signals: `Timeout`/`timed out`, `Killed`/`SIGKILL`, `OOM`/`Out of memory`, `No space left on device`, `Disk quota exceeded`, `Connection reset`, `TLS handshake`, `503`/`429`, image pull failures
-- **Duration / performance regressions (job doesn’t fail but is clearly slower)**
+- **Timeout/performance regressions**
   - Common signals: a stage/step duration increases significantly in logs/summary; approaches timeout threshold; or long periods with no output
-- **Config / permissions / credentials / environment variables**
+- **Configuration/environment issues**
   - Common signals: `Permission denied`, `AccessDenied`, `401/403`, `missing required env`, `KeyError: <ENV>`, secrets/tokens not injected, `could not read credentials`
 
 ## Output (must use this template)

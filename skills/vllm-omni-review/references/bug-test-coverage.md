@@ -85,7 +85,7 @@ Elements required to demonstrate that the bug is fixed and will not recur:
 ## Minimal Test Plan (only when required/recommended)
 
 ### Suggested Test Level
-L1 | L2 | L3 | L4
+L1 / L2 / L3 / L4 (select one)
 
 ### Scenario Name and Intent
 [Brief description]

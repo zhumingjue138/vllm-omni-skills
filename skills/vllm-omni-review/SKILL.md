@@ -106,7 +106,7 @@ gh search prs --repo vllm-project/vllm-omni "<file_path>" --merged --limit 5 --j
 
 **When linked context is critical:**
 
-- `[Bugfix]` PRs → **Always fetch linked issue** for bug reproduction steps
+- `[Bug]` / `[Bugfix]` PRs → **Always fetch linked issue** for bug reproduction steps
 - `[Feature]` PRs → **Always fetch linked issue** for acceptance criteria
 - Complex multi-file changes → **Check related PRs** for area conventions
 - Changes to shared infrastructure → **Check related PRs** for coordination needs
@@ -130,7 +130,7 @@ Check PR title prefix against the table below. If domain-specific context is nee
 | `[API]` | `vllm-omni-api` | OpenAI compat, input validation |
 | `[CI]` | `vllm-omni-cicd` | Pipeline correctness |
 | `[Model]` | `vllm-omni-contrib` | Integration patterns |
-| `[Bugfix]` | — | Regression test required |
+| `[Bug]` / `[Bugfix]` | — | Regression test required; see [Bug Review and Missing Test Case Supplement](references/bug-test-coverage.md) for coverage conclusion and minimal test recommendations |
 | `[Refactor]` | — | No behavior change |
 | `[Feature]` | — | Tests + docs required |
 
@@ -396,6 +396,7 @@ Do NOT flag these as missing:
 - [Common Pitfalls](references/pitfalls.md) — MRO issues, connector state, async patterns
 - [Architecture](references/architecture.md) — System overview and critical paths
 - [Code Patterns](references/code-patterns.md) — Async, distributed, KV cache patterns
+- [Bug Review and Missing Test Case Supplement](references/bug-test-coverage.md) — Coverage conclusion and minimal test recommendations for Bug/Bugfix PRs
 
 ## Quick Reference: What to Invoke When
 

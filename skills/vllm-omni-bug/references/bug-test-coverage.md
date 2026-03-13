@@ -76,7 +76,7 @@ Elements required to demonstrate that the bug is fixed and will not recur:
 ```markdown
 ## Coverage Conclusion
 
-**required** | **recommended** | **not_needed**
+**required** / **recommended** / **not_needed** (select one)
 
 ## Rationale
 
@@ -85,7 +85,7 @@ Elements required to demonstrate that the bug is fixed and will not recur:
 ## Minimal Test Plan (only when required/recommended)
 
 ### Suggested Test Level
-L1 | L2 | L3 | L4
+L1 / L2 / L3 / L4 (select one)
 
 ### Scenario Name and Intent
 [Brief description]
@@ -119,7 +119,7 @@ L1 | L2 | L3 | L4
 | Level | Description | Typical location |
 |-------|-------------|------------------|
 | **L1** | Unit tests, no external dependencies, millisecond runtime | Directories under `tests/` except `tests/e2e/` and `tests/perf/` |
-| **L2&L3** | Integration tests | `tests/e2e` |
+| **L2, L3** | Integration tests | `tests/e2e` |
 | **L4** | Performance/full validation | `tests/perf/`, `tests/e2e` |
 
 ## Examples

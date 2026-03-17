@@ -39,11 +39,11 @@ This skill guides creating deployment guides for omnimodal models using the vLLM
 ## Key Parameters
 [Parameter table for generation config]
 
-## Expected Performance
-[Generation time, throughput metrics on different hardware]
+## Expected Performance ⚪
+[Generation time, throughput metrics on different hardware - include only if you have verified measurements]
 
-## Accuracy Comparison
-[vs Diffusers/HF performance and quality metrics]
+## Accuracy Comparison ⚪
+[vs Diffusers/HF performance and quality metrics - include only if you have verified measurements]
 
 ## Online Serving ⚪
 [vllm serve --omni and OpenAI client examples]
@@ -84,9 +84,12 @@ Architecture types:
 ### 2. Installing vLLM-Omni
 
 ```bash
+# Set version variables (check vllm-omni quickstart for current versions)
+export VLLM_VERSION="0.16.0"
+
 uv venv
 source .venv/bin/activate
-uv pip install vllm==0.XX.0
+uv pip install vllm==$VLLM_VERSION
 uv pip install git+https://github.com/vllm-project/vllm-omni.git
 ```
 
@@ -158,6 +161,7 @@ frames = omni.generate(
 omni = Omni(model="org/any-to-any-model")
 
 # Generate multiple output modalities from mixed input
+# Assumes 'image' is loaded as shown in the Image-to-Video/Image-to-Image example above
 outputs = omni.generate(
     prompt="Describe this scene and generate matching audio",
     pil_image=image,  # Optional: image input
@@ -197,9 +201,11 @@ Provide guidance on choosing the right configuration based on model size and wor
 - Consider disaggregated serving for different modalities
 ```
 
-### 5. Expected Performance
+### 5. Expected Performance ⚪
 
-Include measured metrics from verified deployments:
+**Optional: Include only if you have verified measurements from actual deployments.**
+
+When including performance metrics, cite your measurement methodology and hardware:
 
 ```markdown
 ## Expected Performance
@@ -217,6 +223,8 @@ Performance measured on H100 GPU:
 - Turbo variants achieve similar quality with fewer steps
 ```
 
+**Important:** Do not fabricate benchmark numbers. Only include metrics you have personally verified or can cite from published sources.
+
 ### 6. Key Parameters Table
 
 | Parameter | Default | Description |
@@ -230,7 +238,9 @@ Performance measured on H100 GPU:
 | `num_frames` | 81 | Video: number of frames |
 | `audio_end_in_s` | 10.0 | Audio: duration in seconds |
 
-### 7. Accuracy Comparison
+### 7. Accuracy Comparison ⚪
+
+**Optional: Include only if you have verified measurements from actual testing.**
 
 Compare against Diffusers baseline:
 
@@ -249,6 +259,8 @@ Compare against Diffusers baseline:
 - [List any numerical differences]
 - [Note any vLLM-Omni specific optimizations]
 ```
+
+**Important:** Do not fabricate accuracy metrics. Only include metrics you have personally verified or can cite from published sources.
 
 ## Optional Sections
 
@@ -285,6 +297,7 @@ vllm serve org/model-name --omni
 
 **Client usage:**
 ```python
+import base64
 from openai import OpenAI
 
 client = OpenAI(base_url="http://localhost:8000/v1", api_key="EMPTY")
@@ -314,13 +327,15 @@ vLLM-Omni recipes often reference CLI scripts from the repo:
 ```markdown
 The CLI examples below are from the vLLM-Omni repo. Clone the repo and run:
 
-\`\`\`bash
+```bash
 python examples/offline_inference/text_to_image/text_to_image.py \
   --model org/model-name \
   --prompt "your prompt" \
   --output output.png
-\`\`\`
 ```
+```
+
+> **Note:** When writing a recipe, use proper markdown code blocks without escaping.
 
 ## File Naming
 
@@ -346,19 +361,20 @@ Same convention as vLLM recipes:
 - [ ] HuggingFace link in introduction
 - [ ] Architecture description (DiT, AR+Diffusion, MoE)
 - [ ] Supported models list
-- [ ] Installing vLLM-Omni with correct vllm version
+- [ ] Installing vLLM-Omni with version variable (`$VLLM_VERSION`)
 - [ ] Modality-specific dependencies
 - [ ] Python API example for supported modalities
 - [ ] CLI example (if scripts exist in vllm-omni repo)
 - [ ] **Recommended deployment strategy by hardware/workload**
 - [ ] Key parameters table
-- [ ] **Expected performance metrics (generation time, memory)**
-- [ ] **Accuracy comparison vs Diffusers**
+- [ ] Expected performance metrics (optional - only if verified measurements available)
+- [ ] Accuracy comparison vs Diffusers (optional - only if verified measurements available)
 - [ ] Online serving section (if supported)
 - [ ] Cache-DiT acceleration section (if applicable)
 - [ ] File named correctly
 - [ ] README.md updated with new entry
 
-## Related Skill
+## Related Skills
 
-For standard LLM/vLLM recipes (autoregressive models), use **vllm-recipe** skill instead.
+- **vllm-omni-contrib**: Contributing new models and development workflow to vLLM-Omni
+- For standard LLM/vLLM recipes (autoregressive models), refer to the [vLLM recipes repository](https://github.com/vllm-project/recipes) for examples

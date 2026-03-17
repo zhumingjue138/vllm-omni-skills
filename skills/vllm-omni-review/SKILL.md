@@ -185,7 +185,7 @@ Adding a diffusers comparison would strengthen this PR:
 ```bash
 # Detect leftover diffusers mixins
 gh pr diff <pr_number> --repo vllm-project/vllm-omni \
-  | grep -E '^\+.*DiffusionPipelineMixin|SchedulerMixin|ConfigMixin'
+  | grep '^\+' | grep -E 'DiffusionPipelineMixin|SchedulerMixin|ConfigMixin'
 
 # Check acceleration features
 gh pr diff <pr_number> --repo vllm-project/vllm-omni \

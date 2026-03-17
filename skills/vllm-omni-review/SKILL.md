@@ -113,7 +113,7 @@ Keep additional fetches narrow and tied to a specific uncertainty.
 
 ## Diffusion Model PR Review
 
-> **Invoked when PR prefix is `[Model]`, `[New Model]`, `[Image]`, `[Video]`, or `[Diffusion]`.**
+> **Invoked when PR prefix is `[Model]`, `[New Model]`, `[Image]`, `[ImageGen]`, `[Video]`, `[VideoGen]`, or `[Diffusion]`.**
 
 All four dimensions below must pass before approving. Work through them in priority order.
 

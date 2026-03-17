@@ -8,6 +8,13 @@ Use this checklist as a structured pass after reading the PR diff and body. Each
 
 ### 1.1 Required Evidence (Table A)
 
+| Item | What to Check | Missing → Action |
+|------|---------------|------------------|
+| **vLLM-Omni generation script** | Runnable Python or bash snippet using `Omni` / `vllm serve` that produces output | Request script |
+| **Generated sample outputs** | At least 1 image / video / audio sample attached or linked | Request sample |
+| **vLLM-Omni e2e latency** | Wall-clock time from request to output, with GPU model, count, resolution, steps | Request measurement |
+| **vLLM-Omni VRAM usage** | Peak VRAM in GB during generation, with resolution / steps | Request measurement |
+
 - [ ] **vLLM-Omni generation script present**
   - Must use `Omni(model=...)` for offline, or `vllm serve ... --omni` for online
   - Script must be runnable (no pseudocode, no placeholder `<model_id>`)
@@ -31,6 +38,13 @@ Use this checklist as a structured pass after reading the PR diff and body. Each
 
 ### 1.2 Recommended Evidence (Table B)
 
+| Item | Why It Matters |
+|------|----------------|
+| **diffusers generation script** | Reproducible baseline for quality and speed comparison |
+| **diffusers sample outputs** | Side-by-side quality comparison demonstrates parity |
+| **diffusers e2e latency** | Quantifies vLLM-Omni speedup relative to reference |
+| **diffusers VRAM usage** | Quantifies memory reduction or overhead |
+
 - [ ] **diffusers generation script**
   - Same prompt, same resolution, same number of steps as vLLM-Omni script
   - Uses `diffusers` library directly (not wrapped in vllm-omni)
@@ -50,6 +64,13 @@ Use this checklist as a structured pass after reading the PR diff and body. Each
 ---
 
 ## Dimension 2: Code Checks
+
+### 2.1–2.2 Inference Mode Coverage (both required)
+
+| Check | Pass Condition | Flag |
+|-------|----------------|------|
+| **Offline inference** | `Omni` / `OmniLLM` integration exists; model can be instantiated and called | Missing offline path |
+| **Online serving** | `vllm serve` or `AsyncOmni` handles the model; API routes return correct responses | Missing online path |
 
 ### 2.1 Offline Inference
 
@@ -120,6 +141,13 @@ gh pr view <pr_number> --repo vllm-project/vllm-omni \
   --json files --jq '.files[].path' | grep -E '\.md$|docs/'
 ```
 
+| Doc Artifact | Required | What to Check |
+|--------------|----------|---------------|
+| **Model support table** | Yes | Row added: model name, architecture, HF model ID, modality, min VRAM |
+| **Feature support table** | Yes | Row showing which acceleration and memory features are supported |
+| **Usage example doc** | Yes | Runnable offline + online example for the new model |
+| **Feature compatibility table** | Optional | If multiple features: matrix showing validated combinations |
+
 ### 3.1 Model Support Table
 
 - [ ] Table updated in `docs/models/supported_models.md` (or equivalent)
@@ -157,6 +185,13 @@ Only checked when model supports multiple features:
 gh pr view <pr_number> --repo vllm-project/vllm-omni \
   --json files --jq '.files[].path' | grep '^tests/'
 ```
+
+| Test Type | Location | Required | What to Verify |
+|-----------|----------|----------|----------------|
+| **e2e online serving test** | `tests/e2e/online_serving/` | Yes | Start server, send request, assert output shape / non-null |
+| **Offline inference test** | `tests/` or `tests/models/` | No (if e2e test exists) | Instantiate `Omni`, call `.generate()`, assert output |
+| **Acceleration / memory feature test** | Alongside above | Recommended | Enable each supported feature, verify output and speed |
+| **Combined feature test** | Alongside above | Required if 2+ features | Enable multiple features together, assert output + VRAM + latency |
 
 ### 4.1 e2e Online Serving Test (Required)
 

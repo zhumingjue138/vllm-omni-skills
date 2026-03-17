@@ -115,7 +115,7 @@ Keep additional fetches narrow and tied to a specific uncertainty.
 
 > **Invoked when PR prefix is `[Model]`, `[New Model]`, `[Image]`, `[ImageGen]`, `[Video]`, `[VideoGen]`, or `[Diffusion]`.**
 
-All four dimensions below must pass before approving. Work through them in priority order.
+All four dimensions below must pass before approving. Work through them in priority order. See [references/diffusion-checklist.md](references/diffusion-checklist.md) for full per-item criteria across all dimensions.
 
 ### Priority Order
 
@@ -132,25 +132,9 @@ All four dimensions below must pass before approving. Work through them in prior
 
 ### Dimension 1: PR Body Completeness
 
-#### Table A — Required (block merge if missing)
+Required: generation script, sample outputs, e2e latency, peak VRAM. Recommended: matching diffusers baseline for all four.
 
-| Item | What to Check | Missing → Action |
-|------|---------------|------------------|
-| **vLLM-Omni generation script** | Runnable Python or bash snippet using `Omni` / `vllm serve` that produces output | Request script |
-| **Generated sample outputs** | At least 1 image / video / audio sample attached or linked | Request sample |
-| **vLLM-Omni e2e latency** | Wall-clock time from request to output, with GPU model, count, resolution, steps | Request measurement |
-| **vLLM-Omni VRAM usage** | Peak VRAM in GB during generation, with resolution / steps | Request measurement |
-
-#### Table B — Strongly Recommended (comment if absent, do not block)
-
-| Item | Why It Matters |
-|------|---------------|
-| **diffusers generation script** | Reproducible baseline for quality and speed comparison |
-| **diffusers sample outputs** | Side-by-side quality comparison demonstrates parity |
-| **diffusers e2e latency** | Quantifies vLLM-Omni speedup relative to reference |
-| **diffusers VRAM usage** | Quantifies memory reduction or overhead |
-
-**Comment when Table A items are missing:**
+**Comment when required items are missing:**
 
 ```
 🔴 **PR Body Incomplete — Required Evidence Missing**
@@ -165,7 +149,7 @@ The following items are required before this PR can be reviewed:
 Please update the PR description with this information.
 ```
 
-**Comment when Table B items are absent:**
+**Comment when diffusers baseline is absent:**
 
 ```
 💡 **Recommended: diffusers Baseline Comparison**
@@ -196,49 +180,28 @@ gh pr diff <pr_number> --repo vllm-project/vllm-omni \
   | grep -iE 'cpu_offload|offload_to_cpu|quantization|int8|fp8|bitsandbytes|vae_tiling'
 ```
 
-#### 2.1 Inference Mode Coverage (both required)
-
-| Check | Pass Condition | Flag |
-|-------|---------------|------|
-| **Offline inference** | `Omni` / `OmniLLM` integration exists; model can be instantiated and called | Missing offline path |
-| **Online serving** | `vllm serve` or `AsyncOmni` handles the model; API routes return correct responses | Missing online path |
+**2.1 Inference modes** — both offline (`Omni`) and online (`vllm serve` / `AsyncOmni`) must be implemented.
 
 ```
 🔴 Missing <offline inference / online serving> support. The model must work in both
 Omni (offline) and vllm serve / AsyncOmni (online) modes before merging.
 ```
 
-#### 2.2 Diffusers Mixin Cleanup (required)
-
-Flag if any diffusers mixin is still present in `+` lines:
+**2.2 Diffusers mixin cleanup** — flag any mixin still present in `+` lines.
 
 ```
 🔴 Leftover diffusers mixin detected: `<MixinName>` in `<file>:<line>`.
 Remove diffusers mixins and use vLLM-Omni's native abstractions instead.
 ```
 
-#### 2.3 Acceleration Features (at least one required)
-
-| Feature | Patterns to Detect |
-|---------|-------------------|
-| Sequence Parallel | `sequence_parallel`, `sp_group`, `ring_attn` |
-| CFG Parallel | `cfg_parallel`, `cfg_group`, `ClassifierFreeGuidance` with parallel context |
-| VAE Patch Parallel | `vae_patch_parallel`, `patch_parallel` |
-| Tensor Parallel | `tensor_parallel`, `tp_group`, `ColumnParallelLinear` |
-| TeaCache / Step Cache | `teacache`, `cache_dit`, `cache_interval` |
+**2.3 Acceleration features** — at least one of: sequence parallel, CFG parallel, VAE patch parallel, tensor parallel, TeaCache/step cache.
 
 ```
 🔴 No acceleration feature detected. The model must support at least one of:
 sequence parallel, CFG parallel, VAE patch parallel, tensor parallel, or step caching (TeaCache).
 ```
 
-#### 2.4 Memory Optimization Features (at least one required)
-
-| Feature | Patterns to Detect |
-|---------|-------------------|
-| CPU Offload | `cpu_offload`, `offload_to_cpu`, `--cpu-offload-gb` |
-| Quantization | `quantization`, `int8`, `fp8`, `bnb`, `bitsandbytes`, `load_in_8bit` |
-| VAE Tiling | `vae_tiling`, `tile_size` |
+**2.4 Memory optimization** — at least one of: CPU offload, quantization (int8/fp8/bnb), VAE tiling.
 
 ```
 🔴 No memory optimization feature detected. The model must support at least one of:
@@ -254,12 +217,7 @@ gh pr view <pr_number> --repo vllm-project/vllm-omni \
   --json files --jq '.files[].path' | grep -E 'docs/|\.md$'
 ```
 
-| Doc Artifact | Required | Check |
-|-------------|----------|-------|
-| **Model support table** | Yes | Row added: model name, architecture, HF model ID, modality, min VRAM |
-| **Feature support table** | Yes | Row showing which acceleration and memory features are supported |
-| **Usage example doc** | Yes | Runnable offline + online example for the new model |
-| **Feature compatibility table** | Optional | If multiple features: matrix showing validated combinations |
+Required: model support table, feature support table, usage example doc (offline + online).
 
 ```
 🔴 Documentation incomplete:
@@ -277,14 +235,7 @@ gh pr view <pr_number> --repo vllm-project/vllm-omni \
   --json files --jq '.files[].path' | grep -E '^tests/'
 ```
 
-| Test Type | Location | Required | What to Verify |
-|-----------|----------|----------|----------------|
-| **e2e online serving test** | `tests/e2e/online_serving/` | Yes | Start server, send request, assert output shape / non-null |
-| **Offline inference test** | `tests/` or `tests/models/` | No (if e2e test exists) | Instantiate `Omni`, call `.generate()`, assert output |
-| **Acceleration / memory feature test** | Alongside above | Recommended | Enable each supported feature, verify output and speed |
-| **Combined feature test** | Alongside above | Required if 2+ features | Enable multiple features together, assert output + VRAM + latency |
-
-Flag if e2e online serving test is missing:
+Required: e2e online serving test. Recommended: offline inference test. Required when 2+ features: combined feature test.
 
 ```
 🔴 Missing e2e online serving test in `tests/e2e/online_serving/`.
@@ -294,30 +245,13 @@ Please add a test that:
 3. Asserts the response contains a valid image / video / audio output
 ```
 
-Flag if combined feature test is missing when 2+ features are implemented:
-
 ```
 ⚠️ Multiple features are implemented (e.g., <feature A> + <feature B>) but no combined
 feature test is present. Please add a test (or extend the e2e test) that enables both
 features together and asserts output validity + reports latency + VRAM.
 ```
 
-### Quick Red Flags (post blocking comment immediately)
-
-| Red Flag | Severity |
-|----------|----------|
-| No generation script / sample / latency / VRAM in PR body | 🔴 Blocking |
-| Online or offline inference not implemented | 🔴 Blocking |
-| Diffusers mixin still in production code | 🔴 Blocking |
-| No acceleration feature | 🔴 Blocking |
-| No memory optimization | 🔴 Blocking |
-| No e2e online serving test | 🔴 Blocking |
-| Model or feature support table not updated | 🔴 Blocking |
-| No usage example doc | 🔴 Blocking |
-| No diffusers baseline comparison | 💡 Recommended |
-| No combined feature test (2+ features) | ⚠️ Conditional |
-
-> See [Diffusion Checklist](references/diffusion-checklist.md) and [Diffusion PR Requirements](references/diffusion-pr-requirements.md) for full per-item details.
+> See [Diffusion Checklist](references/diffusion-checklist.md) for full per-item criteria and the Quick Red Flags summary.
 
 ---
 

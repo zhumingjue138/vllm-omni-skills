@@ -49,7 +49,7 @@ Use the title prefix and changed directories to decide whether a domain skill is
 | `[Distributed]` | Use `vllm-omni-distributed` |
 | `[Quantization]` | Use `vllm-omni-quantization` |
 | `[Performance]` | Use `vllm-omni-perf` |
-| `[Hardware]` or backend-specific code | Use `vllm-omni-hardware` |s
+| `[Hardware]` or backend-specific code | Use `vllm-omni-hardware` |
 | `[API]` or `vllm_omni/entrypoints/` changes | Use `vllm-omni-api` |
 | `[CI]` | Use `vllm-omni-cicd` |
 | `[Model]` | Use `vllm-omni-contrib` |
@@ -68,6 +68,7 @@ Load targeted references based on the diff:
 | `vllm_omni/engine/`, `vllm_omni/stages/`, `vllm_omni/connectors/`, `vllm_omni/diffusion/` | [references/pitfalls.md](references/pitfalls.md) |
 | Async, distributed coordination, validation, connector behavior | [references/code-patterns.md](references/code-patterns.md) |
 | Scheduler, stage boundaries, execution model, critical paths | [references/architecture.md](references/architecture.md) |
+| `[Bug]`, `[Bugfix]` regression validation | [references/bug-test-coverage.md](references/bug-test-coverage.md) |
 
 Avoid loading all three by default. Start with the one that matches the changed files or the most likely failure mode.
 

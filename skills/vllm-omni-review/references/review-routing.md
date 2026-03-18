@@ -21,6 +21,10 @@ Use this file when the main review skill needs help deciding which domain skill,
 | `[Refactor]` | none by default | Behavior preservation and invariant drift |
 | `[Feature]` | none by default | Acceptance criteria, docs, tests |
 
+Bug-specific reference:
+
+- For `[Bug]` / `[Bugfix]` reviews, also load [references/bug-test-coverage.md](bug-test-coverage.md) to drive the regression coverage conclusion and a minimal test plan.
+
 ## Multi-Skill Routing
 
 Use one primary skill and add a secondary skill only when the diff crosses a true subsystem boundary.

@@ -89,6 +89,40 @@ Rules:
 - If it’s **infra/environment**: <adjust parallelism/timeouts/resources or include key points for an ops ticket>
 ```
 
+## Linking CI failures to a specific change
+
+When you triage a CI failure from Buildkite (for example
+`https://buildkite.com/vllm/vllm-omni/builds/4293/steps/canvas?...`), you should
+always first identify **which change** the build is running:
+
+- **Branch / commit**: at the top of the Buildkite job page you will see something like
+  `fake0fan:refactor / 722e84e (#1908)`.
+  - `fake0fan:refactor` is the branch.
+  - `722e84e` is the short commit SHA, which links to
+    `https://github.com/vllm-project/vllm-omni/commit/722e84e513ad7784daf55da94984fdd2e8adee54`.
+  - `#1908` is the PR number, which links to
+    `https://github.com/vllm-project/vllm-omni/pull/1908`.
+- Use these links to decide whether the failure is:
+  - **Change-induced**: the failure only appears on this PR/commit, and does not
+    reproduce on the current `main` (or the base branch).
+  - **Pre‑existing or infra**: the same job is already red/flaky on `main` or on
+    unrelated PRs.
+
+Recommended checks:
+
+1. Open the **commit link** and quickly scan the diff for files directly related to the
+   failing job (e.g., TTS tests vs. engine code).
+2. Open the **PR link** to see title, description, and any explicit claims (perf,
+   correctness, infra, etc.).
+3. Optionally compare with a recent **green run on `main`** for the same job to see
+   whether the failure pattern is new.
+
+When you fill in the triage template above, use:
+
+- `Change`: set to the PR or full SHA (e.g. `#1908 / 722e84e513ad7784daf55da94984fdd2e8adee54`).
+- In **Recommended actions**, explicitly say whether the evidence points to “regression
+  introduced by this PR/commit” vs. “likely pre‑existing / infra issue”.
+
 ## Additional resources
 
 - L1–L5 levels and directory conventions: `https://github.com/vllm-project/vllm-omni/blob/main/docs/contributing/ci/CI_5levels.md`

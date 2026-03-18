@@ -33,6 +33,7 @@ Fetch:
 - The diff
 - Linked issues for `[Bugfix]` and `[Feature]` PRs
 - Related PRs only when conventions or prior decisions are unclear
+- If a CI job/log URL is provided (e.g. Buildkite step link), extract the failing job, first error, and the PR/commit being tested (branch/sha/pr number)
 
 Do not fetch broad extra context unless the diff or linked issue leaves real ambiguity.
 
@@ -51,7 +52,8 @@ Use the title prefix and changed directories to decide whether a domain skill is
 | `[Performance]` | Use `vllm-omni-perf` |
 | `[Hardware]` or backend-specific code | Use `vllm-omni-hardware` |
 | `[API]` or `vllm_omni/entrypoints/` changes | Use `vllm-omni-api` |
-| `[CI]` | Use `vllm-omni-cicd` |
+| `[CI]` (pipeline/config/infra/deploy changes) | Use `vllm-omni-cicd` |
+| CI log URL (Buildkite/GHA) | Use [references/ci-failure-duration-triage.md](references/ci-failure-duration-triage.md) |
 | `[Model]` | Use `vllm-omni-contrib` |
 
 If the PR spans multiple specialized areas, choose the primary skill first and load a secondary skill only when the diff crosses a real subsystem boundary.

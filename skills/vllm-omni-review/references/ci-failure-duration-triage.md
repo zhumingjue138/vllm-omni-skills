@@ -38,7 +38,7 @@ Rules:
 - For duration issues, explicitly state: **stage name + baseline vs current run**.
 - If there are multiple hypotheses, mark priority (usually ordered by verification cost from low to high).
 
-```markdown
+````markdown
 ## CI Triage Report
 
 - **Job**: <job name> / <L1|L2|…> / <trigger>
@@ -87,7 +87,7 @@ Rules:
 - If verification **confirms**: <fix direction or recommend reverting the change>
 - If verification **does not confirm**: <move to next hypothesis or expand logs/contact infra>
 - If it’s **infra/environment**: <adjust parallelism/timeouts/resources or include key points for an ops ticket>
-```
+````
 
 ## Linking CI failures to a specific change
 

@@ -38,7 +38,7 @@ Rules:
 - For duration issues, explicitly state: **stage name + baseline vs current run**.
 - If there are multiple hypotheses, mark priority (usually ordered by verification cost from low to high).
 
-````markdown
+```markdown
 ## CI Triage Report
 
 - **Job**: <job name> / <L1|L2|…> / <trigger>
@@ -87,21 +87,19 @@ Rules:
 - If verification **confirms**: <fix direction or recommend reverting the change>
 - If verification **does not confirm**: <move to next hypothesis or expand logs/contact infra>
 - If it’s **infra/environment**: <adjust parallelism/timeouts/resources or include key points for an ops ticket>
-````
+```
 
 ## Linking CI failures to a specific change
 
 When you triage a CI failure from Buildkite (for example
-`https://buildkite.com/vllm/vllm-omni/builds/4293/steps/canvas?...`), you should
+`https://buildkite.com/...`), you should
 always first identify **which change** the build is running:
 
 - **Branch / commit**: at the top of the Buildkite job page you will see something like
-  `fake0fan:refactor / 722e84e (#1908)`.
-  - `fake0fan:refactor` is the branch.
-  - `722e84e` is the short commit SHA, which links to
-    `https://github.com/vllm-project/vllm-omni/commit/722e84e513ad7784daf55da94984fdd2e8adee54`.
-  - `#1908` is the PR number, which links to
-    `https://github.com/vllm-project/vllm-omni/pull/1908`.
+  `Example:main / xxxx (#xxxx)`.
+  - `Example:main` is the branch.
+  - `xxxx` is the short commit SHA.
+  - `#xxxx` is the PR number.
 - Use these links to decide whether the failure is:
   - **Change-induced**: the failure only appears on this PR/commit, and does not
     reproduce on the current `main` (or the base branch).
@@ -119,7 +117,7 @@ Recommended checks:
 
 When you fill in the triage template above, use:
 
-- `Change`: set to the PR or full SHA (e.g. `#1908 / 722e84e513ad7784daf55da94984fdd2e8adee54`).
+- `Change`: set to the PR or full SHA (e.g. `#xxxx / xxxx`).
 - In **Recommended actions**, explicitly say whether the evidence points to “regression
   introduced by this PR/commit” vs. “likely pre‑existing / infra issue”.
 

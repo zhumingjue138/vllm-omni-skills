@@ -18,17 +18,33 @@ Before optimizing, establish a baseline:
 
 1. **Identify the model** and its pipeline class (check `model_index.json` → `_class_name`)
 2. **Run a baseline** with `--enforce-eager` (disables torch.compile) and no parallelism
-3. **Record**: total time, denoising it/s, VRAM usage, output quality
+3. **Record**: server inference time, e2e latency, VRAM usage, output quality
+
+**Online serving** (preferred — measures real deployment latency):
 
 ```bash
-# Baseline example (text-to-image)
-python examples/offline_inference/text_to_image/text_to_image.py \
-  --model <MODEL> --enforce-eager --prompt "..." --output baseline.png
+# Start server
+vllm serve <MODEL> --omni --port 8098 --enforce-eager
 
-# Baseline example (text-to-video)
+# Send request and measure e2e time
+time curl -sS -X POST http://localhost:8098/v1/videos \
+  -F "prompt=..." -F "width=768" -F "height=480" \
+  -F "num_frames=41" -F "num_inference_steps=20" -F "seed=42"
+
+# Poll until completed, record inference_time_s from status response
+curl -sS http://localhost:8098/v1/videos/<VIDEO_ID> | jq '.inference_time_s'
+```
+
+**Offline inference** (useful for quick iteration):
+
+```bash
 python examples/offline_inference/text_to_video/text_to_video.py \
   --model <MODEL> --enforce-eager --prompt "..." --output baseline.mp4
 ```
+
+> **Important**: Always report online serving numbers for deployment decisions.
+> Offline benchmarks may differ due to process startup, torch.compile warmup,
+> and measurement methodology.
 
 ## Step 1: Apply Lossless Optimizations
 
@@ -40,9 +56,11 @@ These do **not** affect output quality. Apply in order of impact.
 
 **How**: Enabled by **default**. Use `--enforce-eager` to disable.
 
-**Speedup**: ~1.2–1.5× on denoising loop.
+**Speedup**: Model- and GPU-dependent. May provide 1.1–1.5× on the denoising loop, but on some GPU architectures (e.g., H800) and models, warm-request latency may match eager.
 
-**Requirements**: Model transformer must define `_repeated_blocks` attribute. First request is slower (compilation warmup).
+**Requirements**: Model transformer must define `_repeated_blocks` attribute. First request pays compilation overhead (~5–15s extra).
+
+**Online serving note**: The first request after server start incurs compilation warmup. Subsequent requests run at compiled speed. For latency-sensitive deployments, consider `--enforce-eager` to avoid first-request penalty, especially if compile does not measurably improve warm latency for your model/GPU.
 
 **Config**: `OmniDiffusionConfig.enforce_eager` (default `False` = compile enabled).
 
@@ -294,64 +312,74 @@ Run `vllm serve --help` and look for `--omni`-related flags. Key flags:
 
 ## Quick Recipes
 
-### Recipe A: Maximum speed, single GPU, lossless (Image model)
+Recipes show both **online serving** (preferred for deployment) and **offline** variants.
+
+### Recipe A: Single GPU, lossless (Image model — online)
 
 ```bash
-python text_to_image.py \
-  --model Qwen/Qwen-Image \
-  --prompt "..." \
-  --quantization fp8
-# torch.compile is on by default
+# Server
+vllm serve Qwen/Qwen-Image --omni --port 8098 --quantization fp8
+
+# Client
+curl -X POST http://localhost:8098/v1/images/generations \
+  -F "prompt=A futuristic city at sunset" -F "seed=42"
 ```
 
-### Recipe B: Maximum speed, multi-GPU, lossless (Image model, 4 GPUs)
+### Recipe B: Multi-GPU, lossless (Image model, 4 GPUs — online)
 
 ```bash
-python text_to_image.py \
-  --model Qwen/Qwen-Image \
-  --prompt "..." \
-  --cfg-parallel-size 2 --ulysses-degree 2 \
-  --quantization fp8
+vllm serve Qwen/Qwen-Image --omni --port 8098 \
+  --cfg-parallel-size 2 --usp 2 --quantization fp8
 ```
 
-### Recipe C: Low VRAM, single GPU (Video model)
+### Recipe C: Low VRAM, single GPU (Video model — online)
 
 ```bash
-python text_to_video.py \
-  --model Wan-AI/Wan2.2-T2V-A14B-Diffusers \
-  --prompt "..." \
-  --enable-layerwise-offload \
-  --vae-use-slicing --vae-use-tiling
+vllm serve Wan-AI/Wan2.2-T2V-A14B-Diffusers --omni --port 8098 \
+  --enable-layerwise-offload --vae-use-slicing --vae-use-tiling
 ```
 
-### Recipe D: Maximum speed, multi-GPU, lossless (Video model, 8 GPUs)
+### Recipe D: Multi-GPU, lossless (Video model, 8 GPUs — online)
 
 ```bash
-python text_to_video.py \
-  --model Wan-AI/Wan2.2-T2V-A14B-Diffusers \
-  --prompt "..." \
-  --ulysses-degree 4 --ring-degree 2 \
-  --vae-patch-parallel-size 8 \
-  --quantization fp8
+vllm serve Wan-AI/Wan2.2-T2V-A14B-Diffusers --omni --port 8098 \
+  --usp 4 --ring 2 --vae-patch-parallel-size 8 --quantization fp8
 ```
 
-### Recipe E: Lossy speedup with cache acceleration (Image model)
+### Recipe E: Lossy speedup with Cache-DiT (Image model — online)
 
 ```bash
-python text_to_image.py \
-  --model Qwen/Qwen-Image \
-  --prompt "..." \
+vllm serve Qwen/Qwen-Image --omni --port 8098 \
+  --enforce-eager --cache-backend cache_dit
+```
+
+### Recipe F: LTX-2 video baseline (online)
+
+```bash
+vllm serve Lightricks/LTX-2 --omni --port 8098 \
+  --enforce-eager --flow-shift 1.0 --boundary-ratio 1.0
+```
+
+### Recipe G: LTX-2 video with Cache-DiT (~1.4× speedup, online)
+
+```bash
+vllm serve Lightricks/LTX-2 --omni --port 8098 \
+  --enforce-eager --flow-shift 1.0 --boundary-ratio 1.0 \
   --cache-backend cache_dit
 ```
 
-### Recipe F: LTX-2 video, 2-GPU SP, lossless
+### Offline equivalents
+
+For quick local testing, replace `vllm serve ... --omni` with the offline scripts:
 
 ```bash
-python text_to_video.py \
-  --model Lightricks/LTX-2 \
-  --prompt "..." \
-  --ulysses-degree 2 \
-  --height 768 --width 1280 --num-frames 97
+# Image
+python examples/offline_inference/text_to_image/text_to_image.py \
+  --model Qwen/Qwen-Image --prompt "..." --quantization fp8
+
+# Video
+python examples/offline_inference/text_to_video/text_to_video.py \
+  --model Lightricks/LTX-2 --prompt "..." --enforce-eager
 ```
 
 ## Decision Flowchart
@@ -369,11 +397,13 @@ Is output quality paramount?
 
 ## Tips
 
-- **Always benchmark with torch.compile enabled** (remove `--enforce-eager`). First request is slower but subsequent ones are faster.
+- **Benchmark in online serving mode** for deployment decisions. Offline numbers may differ due to process startup and measurement methodology.
+- **Use `--enforce-eager`** unless torch.compile measurably improves warm-request latency for your model/GPU. This avoids first-request compilation overhead.
 - **CFG parallel + Ulysses is usually better** than pure Ulysses at the same GPU count for CFG models.
 - **Layerwise offload is nearly free for video models** where per-block compute dwarfs H2D transfer time.
-- **Combine lossless + lossy**: e.g., torch.compile + FP8 + TeaCache for maximum throughput.
+- **Combine lossless + lossy**: e.g., FP8 + Cache-DiT for maximum throughput.
 - **Check `_NO_CACHE_ACCELERATION`** in `registry.py` before enabling cache backends — UNet-based and some specialized models don't support them.
+- **Send multiple requests** when benchmarking online serving to measure warm (steady-state) latency rather than first-request startup.
 
 ## Key Source Files
 

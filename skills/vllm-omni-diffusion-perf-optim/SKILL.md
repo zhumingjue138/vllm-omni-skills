@@ -1,5 +1,5 @@
 ---
-name: optimize-diffusion-perf
+name: vllm-omni-diffusion-perf-optim
 description: Guide for achieving optimal inference performance with vLLM-Omni diffusion models. Covers all lossless and lossy optimization methods (parallelism, torch.compile, CPU offload, quantization, cache acceleration), per-model support tables, and ready-to-use recipes. Use when asked to speed up diffusion inference, reduce latency, lower VRAM usage, or tune a diffusion pipeline.
 ---
 
@@ -68,7 +68,7 @@ These do **not** affect output quality. Apply in order of impact.
 
 ### 1.2 Multi-GPU Parallelism
 
-All configured via `DiffusionParallelConfig`. Check the support table below before enabling.
+All configured via `DiffusionParallelConfig`. Check `docs/user_guide/diffusion/parallelism_acceleration.md` for the per-model support table before enabling.
 
 #### Sequence Parallelism (Ulysses-SP)
 

@@ -25,6 +25,19 @@ Check mergeability and required checks before reading the diff in depth. If DCO,
 
 For concrete gate commands, review submission commands, and comment style, see [references/review-execution.md](references/review-execution.md).
 
+### Step 0.5: Check PR Size for Large Changes
+
+For large PRs that exceed either threshold:
+- **More than 1000 lines of code changed**, OR
+- **More than 10 files changed**
+
+Ask the contributor to run L3 tests locally and paste the test results in the PR (highly recommended). This helps ensure comprehensive validation for substantial changes before investing review effort.
+
+For test level definitions and commands, see the [L3/L4 test guide](https://docs.vllm.ai/projects/vllm-omni/en/latest/contributing/ci/test_guide/#l3-level--l4-level).
+
+Example request:
+> This PR is substantial (>1000 LOC / >10 files). Could you please run the [L3 tests](https://docs.vllm.ai/projects/vllm-omni/en/latest/contributing/ci/test_guide/#l3-level--l4-level) locally and paste the results here? This helps validate the change across broader scenarios before we proceed with the detailed review.
+
 ### Step 1: Gather Minimal Context
 
 Fetch:

@@ -82,7 +82,7 @@ BLOCKER scan:
 | Doc-only PRs | Skip categories 1-4 and 6, proceed to 5 (Documentation) |
 | Config-only PRs | Focus on Breaking Changes + Documentation |
 | Test-only PRs | Focus on Correctness of test logic |
-| Draft PRs | Skip blocker scan, comment "Ready for review when draft status removed" |
+| Draft PRs | Do not block; add a single non-blocking comment: "Ready for full review when draft status removed. Preliminary scan available on request." |
 
 For detailed anti-patterns with code examples, see [references/blocker-patterns.md](references/blocker-patterns.md).
 
@@ -186,7 +186,7 @@ For comment budget and phrasing, see [references/review-execution.md](references
 | Doc-only PR | Skip to Documentation only | Skip | Standard format |
 | Config-only PR | Breaking Changes + Documentation | Skip | Standard format |
 | Test-only PR | Correctness of test logic | Skip | Standard format |
-| Draft PR | Skip | Skip | COMMENT: "Ready when draft removed" |
+| Draft PR | Do not block (skip scan) | Skip | COMMENT (non-blocking): "Ready for full review when draft removed" |
 | Large PR (>1000 LOC) | Shallow scan + request L3 tests | Route by prefix/diff | Standard format |
 
 ## When to Fetch More Context
@@ -351,3 +351,5 @@ features together and asserts output validity + reports latency + VRAM.
 - [Common Pitfalls](references/pitfalls.md) - MRO issues, connector state, async differences
 - [Architecture](references/architecture.md) - System overview and critical paths
 - [Code Patterns](references/code-patterns.md) - Async, distributed, cache, validation, error handling patterns
+- [Bug Test Coverage](references/bug-test-coverage.md) - Regression test requirements for bug fixes
+- [Diffusion PR Requirements](references/diffusion-pr-requirements.md) - PR body requirements for diffusion model contributions

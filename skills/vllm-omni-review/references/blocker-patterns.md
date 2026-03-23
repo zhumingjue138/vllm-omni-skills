@@ -2,7 +2,7 @@
 
 Each pattern includes: the anti-pattern, why it's dangerous, and required fix.
 
-with cross-references to [code-patterns.md](references/code-patterns.md) for "how to fix" guidance.
+Cross-references point to [code-patterns.md](code-patterns.md) for "how to fix" guidance.
 
 ## Exception Handling
 
@@ -19,7 +19,7 @@ except:
 
 **Required fix:** At minimum, log the exception. Better: catch specific exceptions.
 
-**Cross-ref:** See [Error Handling Pattern](references/code-patterns.md#error-handling) for proper exception handling with logging.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling) for proper exception handling with logging.
 
 ---
 
@@ -36,7 +36,7 @@ for item in items:
 
 **Required fix:** Log failure, increment counter, or fail fast.
 
-**Cross-ref:** See [Error Handling Pattern](references/code-patterns.md#error-handling) for proper exception handling with logging.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling) for proper exception handling with logging.
 
 ---
 
@@ -47,9 +47,14 @@ result = obj.method().nested.value  # potential AttributeError
 
 **Why dangerous:** Crashes with `AttributeError` if any step returns `None`.
 
-**Required fix:** Add None guards or use safe navigation patterns like `?.attr`.
+**Required fix:** Add explicit None guards before accessing attributes.
 
-**Cross-ref:** See [None Safety](references/code-patterns.md#none-safety) for guard patterns.
+```python
+if obj is not None and obj.method() is not None:
+    result = obj.method().nested.value
+```
+
+**Cross-ref:** See [None Safety](code-patterns.md#none-safety) for guard patterns.
 
 ---
 
@@ -66,7 +71,7 @@ content = f.read()
 
 **Required fix:** Use context managers (`with open(...) as f:`).
 
-**Cross-ref:** See [Connector Communication](references/code-patterns.md#connector-communication) for proper connector usage with context managers.
+**Cross-ref:** See [Connector Communication](code-patterns.md#connector-communication) for proper connector usage with context managers.
 
 ---
 
@@ -81,7 +86,7 @@ async def append(item):
 
 **Required fix:** Use `asyncio.Lock` or thread-safe structures.
 
-**Cross-ref:** See [Distributed Execution Patterns](references/code-patterns.md#distributed-execution-pattern) for thread safety alternatives.
+**Cross-ref:** See [Distributed Execution Patterns](code-patterns.md#distributed-execution-pattern) for thread safety alternatives.
 
 ---
 
@@ -94,9 +99,20 @@ result = obj.method().nested.value  # no None checks
 
 **Why dangerous:** `AttributeError` if any step returns `None`.
 
-**Required fix:** Add None guards or use safe navigation patterns like `?.attr` and `?.get()`.
+**Required fix:** Add explicit None guards before each access, or use `getattr()` with defaults.
 
-**Cross-ref:** See [Input Validation Pattern](references/code-patterns.md#input-validation-pattern) for early validation guidance.
+```python
+# Option 1: Explicit None checks
+if obj is not None:
+    method_result = obj.method()
+    if method_result is not None:
+        result = method_result.nested.value
+
+# Option 2: getattr with default
+result = getattr(getattr(obj, "method", lambda: None)(), "nested", None)
+```
+
+**Cross-ref:** See [Input Validation Pattern](code-patterns.md#input-validation-pattern) for early validation guidance.
 
 ---
 
@@ -114,7 +130,7 @@ def process(data):
 
 **Required fix:** Add explicit None check and log a warning. Better: `return None`.
 
-**Cross-ref:** See [Input Validation Pattern](references/code-patterns.md#input-validation-pattern) for validation guidance.
+**Cross-ref:** See [Input Validation Pattern](code-patterns.md#input-validation-pattern) for validation guidance.
 
 ---
 
@@ -133,7 +149,7 @@ def get_user(user_id: int, include_profile: bool):  # Breaking change!
 
 **Required fix:** Add deprecation path or maintain backward compatibility for 1-2 releases. Document migration.
 
-**Cross-ref:** See [API Endpoints](references/code-patterns.md#api-endpoints) for API compatibility guidance.
+**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for API compatibility guidance.
 
 ---
 
@@ -146,7 +162,7 @@ def remove_feature(name):
 
 **Why dangerous:** Breaks existing code that depends on this function.
 **required fix:** If removal is necessary, provide replacement. Otherwise, document breaking change and deprecation timeline.
-**Cross-ref:** See [API Endpoints](references/code-patterns.md#api-endpoints) for OpenAI compatibility guidance
+**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for OpenAI compatibility guidance
 ---
 
 ### Pattern: Changed Default
@@ -160,7 +176,7 @@ class Config:
 
 **Required fix:** Document the change clearly. If intentional, provide rollback code or migration script.
 
-**Cross-ref:** See [API Endpoints](references/code-patterns.md#api-endpoints) for API compatibility guidance.
+**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for API compatibility guidance.
 
 ---
 
@@ -176,7 +192,7 @@ class DiffusionModel:
 
 **Why dangerous:** Memory leaks accumulate across generations.
 **required fix:** Explicitly clear latent cache after generation. Add memory-pressure handling.
-**Cross-ref:** See [Memory Management in Diffusion](references/pitfalls.md#memory-management-in-diffusion) for latent cache lifecycle guidance
+**Cross-ref:** See [Memory Management in Diffusion](pitfalls.md#memory-management-in-diffusion) for latent cache lifecycle guidance
 ---
 
 ## Async Safety
@@ -191,7 +207,7 @@ async def process(self, request):
 
 **Why dangerous:** Blocks event loop, prevents concurrent requests.
 **required fix:** Use `asyncio.to_thread()` or await pattern.
-**Cross-ref:** See [Async Function Complexity](references/code-patterns.md#async-function-complexity) for async patterns
+**Cross-ref:** See [Async Function Complexity](code-patterns.md#async-function-complexity) for async patterns
 ---
 
 ### Pattern: Hardcoded Timeout
@@ -204,7 +220,7 @@ def connect(url):
 
 **Required fix:** Make timeout configurable or add timeout parameter to CLI flags.
 
-**Cross-ref:** See [Connector Communication](references/code-patterns.md#connector-communication) for proper connector usage.
+**Cross-ref:** See [Connector Communication](code-patterns.md#connector-communication) for proper connector usage.
 
 ---
 
@@ -223,7 +239,7 @@ for attempt in range(MAX_RETRIES):
 
 **Required fix:** Use exponential backoff with configurable max retries or circuit breaker pattern.
 
-**Cross-ref:** See [Stage Lifecycle](references/code-patterns.md#stage-lifecycle) for lifecycle management.
+**Cross-ref:** See [Stage Lifecycle](code-patterns.md#stage-lifecycle) for lifecycle management.
 
 ---
 
@@ -240,7 +256,7 @@ for r in requests:
 
 **Required fix:** Use `asyncio.gather()` with `return_exceptions=True` for parallel execution.
 
-**Cross-ref:** See [Async Function Complexity](references/code-patterns.md#async-function-complexity) for proper async patterns.
+**Cross-ref:** See [Async Function Complexity](code-patterns.md#async-function-complexity) for proper async patterns.
 
 ---
 
@@ -257,7 +273,7 @@ else:
 
 **Required fix:** Check `torch.cuda.is_available()` first and use appropriate fallback.
 
-**Cross-ref:** See [Distributed Execution Patterns](references/code-patterns.md#distributed-execution-pattern) for distributed patterns.
+**Cross-ref:** See [Distributed Execution Patterns](code-patterns.md#distributed-execution-pattern) for distributed patterns.
 
 ---
 
@@ -274,7 +290,7 @@ response = model.generate(request.json["prompt"])
 
 **Required fix:** Validate all user inputs before passing to model.
 
-**Cross-ref:** See [Input Validation Pattern](references/code-patterns.md#input-validation-pattern) for validation guidance.
+**Cross-ref:** See [Input Validation Pattern](code-patterns.md#input-validation-pattern) for validation guidance.
 
 ---
 
@@ -291,7 +307,7 @@ async def create_item(self, request):
 
 **Required fix:** Validate responses match schema and handle errors explicitly.
 
-**Cross-ref:** See [Error Handling Pattern](references/code-patterns.md#error-handling-pattern) for proper error handling patterns.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern) for proper error handling patterns.
 
 ---
 
@@ -308,7 +324,7 @@ DATABASE_PASSWORD = "secret123"
 
 **Required fix:** Use environment variables or secret management systems.
 
-**Cross-ref:** See [Logging Pattern](references/code-patterns.md#logging-pattern) for proper logging practices.
+**Cross-ref:** See [Logging Pattern](code-patterns.md#logging-pattern) for proper logging practices.
 
 ---
 
@@ -322,7 +338,7 @@ data = pickle.loads(user_input)
 
 **Required fix:** Never use `pickle.loads()` on untrusted data. Use safe deserialization libraries.
 
-**Cross-ref:** See [Error Handling Pattern](references/code-patterns.md#error-handling-pattern) for safe error handling patterns.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern) for safe error handling patterns.
 
 ---
 
@@ -336,21 +352,31 @@ cursor.execute(user_input)  # Direct string interpolation
 
 **Required fix:** Use parameterized queries (prepared statements, ORM).
 
-**Cross-ref:** See [Input Validation Pattern](references/code-patterns.md#input-validation-pattern) for validation guidance.
+**Cross-ref:** See [Input Validation Pattern](code-patterns.md#input-validation-pattern) for validation guidance.
 
 ---
 
-### Pattern: Format String Vulnerability
+### Pattern: Unsafe String Formatting with User Input
 ```python
-# BLOCKER: User input directly in format strings
-welcome_msg = f"Hello, {user_input}!"  # Potential injection vector
+# BLOCKER: User-controlled format string enables code injection
+user_template = request.args.get("template")  # e.g., "{user.__class__.__mro__}"
+msg = user_template.format(user=current_user)  # Can leak internal state!
+
+# BLOCKER: eval/exec with user input
+result = eval(user_expression)  # Remote code execution!
+query = f"SELECT * FROM {user_table}"  # SQL injection via string formatting
 ```
 
-**Why dangerous:** Can lead to injection attacks or unexpected behavior.
+**Why dangerous:** `str.format()` with user-controlled templates can access object attributes. `eval()`/`exec()` execute arbitrary code. String formatting into SQL/HTML enables injection.
 
-**Required fix:** Sanitize user input before interpolation or use template strings with placeholders.
+**Required fix:**
+- For templates: use sandboxed template engines (Jinja2 with autoescape) or whitelist allowed placeholders
+- For SQL: use parameterized queries, never string interpolation
+- For code execution: never pass user input to `eval()`/`exec()`
 
-**Cross-ref:** See [Input Validation Pattern](references/code-patterns.md#input-validation-pattern) for validation guidance.
+**Note:** Normal f-strings like `f"Hello, {name}!"` are safe - they don't execute code, just interpolate.
+
+**Cross-ref:** See [Input Validation Pattern](code-patterns.md#input-validation-pattern) for validation guidance.
 
 ---
 
@@ -367,7 +393,7 @@ def fix_bug():
 
 **Required fix:** Add a regression test that reproduces the original bug.
 
-**Cross-ref:** See [Test Coverage Requirements](references/code-patterns.md#test-coverage-requirements) for test coverage requirements.
+**Cross-ref:** See [Test Coverage Requirements](code-patterns.md#test-coverage-requirements) for test coverage requirements.
 
 ---
 
@@ -383,7 +409,7 @@ def test_result():
 
 **Required fix:** Use meaningful assertions that verify actual behavior.
 
-**Cross-ref:** See [Test Coverage Requirements](references/code-patterns.md#test-coverage-requirements) for test coverage requirements.
+**Cross-ref:** See [Test Coverage Requirements](code-patterns.md#test-coverage-requirements) for test coverage requirements.
 
 ---
 
@@ -402,7 +428,7 @@ class MockModel(Mixin):  # Missing nn.Module
 
 **Required fix:** Ensure mocks match production inheritance hierarchy.
 
-**Cross-ref:** See [Test Mock Mismatches](references/pitfalls.md#test-mock-mismatches) for mock testing guidance.
+**Cross-ref:** See [Test Mock Mismatches](pitfalls.md#test-mock-mismatches) for mock testing guidance.
 
 ---
 
@@ -419,7 +445,7 @@ def process(self, data):
 
 **Required fix:** Add tests for error handling, edge cases (empty, null, boundary).
 
-**Cross-ref:** See [Test Coverage Requirements](references/code-patterns.md#test-coverage-requirements) for test coverage requirements.
+**Cross-ref:** See [Test Coverage Requirements](code-patterns.md#test-coverage-requirements) for test coverage requirements.
 
 ---
 
@@ -435,7 +461,7 @@ def optimize():
 
 **Required fix:** Run benchmarks with `pytest` or manual timing, document results.
 
-**Cross-ref:** See [Test Coverage Requirements](references/code-patterns.md#test-coverage-requirements) for test coverage requirements.
+**Cross-ref:** See [Test Coverage Requirements](code-patterns.md#test-coverage-requirements) for test coverage requirements.
 
 ---
 
@@ -449,7 +475,7 @@ pass
 
 **Required fix:** Use memory profiling tools and report peak and delta.
 
-**Cross-ref:** See [Memory Management in Diffusion](references/pitfalls.md#memory-management-in-diffusion) for latent cache lifecycle guidance.
+**Cross-ref:** See [Memory Management in Diffusion](pitfalls.md#memory-management-in-diffusion) for latent cache lifecycle guidance.
 
 ---
 
@@ -464,7 +490,7 @@ def test_distributed(self):
 
 **Required fix:** Test in distributed mode with `torchrun`.
 
-**Cross-ref:** See [Tensor Parallelism Edge Cases](references/pitfalls.md#tensor-parallelism-edge-cases) for distributed testing guidance.
+**Cross-ref:** See [Tensor Parallelism Edge Cases](pitfalls.md#tensor-parallelism-edge-cases) for distributed testing guidance.
 
 ---
 
@@ -481,7 +507,7 @@ def migrate_config():
 
 **Required fix:** Document breaking changes in RELEASE_NOTES.md. Provide migration instructions.
 
-**Cross-ref:** See [API Endpoints](references/code-patterns.md#api-endpoints) for OpenAI compatibility guidance.
+**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for OpenAI compatibility guidance.
 
 ---
 
@@ -496,4 +522,4 @@ def add_feature():
 
 **Required fix:** Add usage examples, docstrings.
 
-**Cross-ref:** See [Documentation Blockers](references/review-execution.md#documentation-blockers) for blocking issues.
+**Cross-ref:** See [Documentation Blockers](review-execution.md#documentation-blockers) for blocking issues.

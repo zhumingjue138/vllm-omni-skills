@@ -19,7 +19,7 @@ except:
 
 **Required fix:** At minimum, log the exception. Better: catch specific exceptions.
 
-**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling) for proper exception handling with logging.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern) for proper exception handling with logging.
 
 ---
 
@@ -36,7 +36,7 @@ for item in items:
 
 **Required fix:** Log failure, increment counter, or fail fast.
 
-**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling) for proper exception handling with logging.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern) for proper exception handling with logging.
 
 ---
 
@@ -54,7 +54,7 @@ if obj is not None and obj.method() is not None:
     result = obj.method().nested.value
 ```
 
-**Cross-ref:** See [None Safety](code-patterns.md#none-safety) for guard patterns.
+**Cross-ref:** See [None Safety](code-patterns.md#input-validation-pattern) for guard patterns.
 
 ---
 
@@ -86,7 +86,7 @@ async def append(item):
 
 **Required fix:** Use `asyncio.Lock` or thread-safe structures.
 
-**Cross-ref:** See [Distributed Execution Patterns](code-patterns.md#distributed-execution-pattern) for thread safety alternatives.
+**Cross-ref:** See [Distributed Execution Patterns](code-patterns.md#distributed-execution-patterns) for thread safety alternatives.
 
 ---
 
@@ -149,7 +149,7 @@ def get_user(user_id: int, include_profile: bool):  # Breaking change!
 
 **Required fix:** Add deprecation path or maintain backward compatibility for 1-2 releases. Document migration.
 
-**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for API compatibility guidance.
+**Cross-ref:** See [API Endpoints](code-patterns.md#connector-communication) for API compatibility guidance.
 
 ---
 
@@ -162,7 +162,7 @@ def remove_feature(name):
 
 **Why dangerous:** Breaks existing code that depends on this function.
 **required fix:** If removal is necessary, provide replacement. Otherwise, document breaking change and deprecation timeline.
-**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for OpenAI compatibility guidance
+**Cross-ref:** See [API Endpoints](code-patterns.md#connector-communication) for OpenAI compatibility guidance
 ---
 
 ### Pattern: Changed Default
@@ -176,7 +176,7 @@ class Config:
 
 **Required fix:** Document the change clearly. If intentional, provide rollback code or migration script.
 
-**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for API compatibility guidance.
+**Cross-ref:** See [API Endpoints](code-patterns.md#connector-communication) for API compatibility guidance.
 
 ---
 
@@ -273,7 +273,7 @@ else:
 
 **Required fix:** Check `torch.cuda.is_available()` first and use appropriate fallback.
 
-**Cross-ref:** See [Distributed Execution Patterns](code-patterns.md#distributed-execution-pattern) for distributed patterns.
+**Cross-ref:** See [Distributed Execution Patterns](code-patterns.md#distributed-execution-patterns) for distributed patterns.
 
 ---
 
@@ -307,7 +307,7 @@ async def create_item(self, request):
 
 **Required fix:** Validate responses match schema and handle errors explicitly.
 
-**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern) for proper error handling patterns.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern-pattern) for proper error handling patterns.
 
 ---
 
@@ -338,7 +338,7 @@ data = pickle.loads(user_input)
 
 **Required fix:** Never use `pickle.loads()` on untrusted data. Use safe deserialization libraries.
 
-**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern) for safe error handling patterns.
+**Cross-ref:** See [Error Handling Pattern](code-patterns.md#error-handling-pattern-pattern) for safe error handling patterns.
 
 ---
 
@@ -507,7 +507,7 @@ def migrate_config():
 
 **Required fix:** Document breaking changes in RELEASE_NOTES.md. Provide migration instructions.
 
-**Cross-ref:** See [API Endpoints](code-patterns.md#api-endpoints) for OpenAI compatibility guidance.
+**Cross-ref:** See [API Endpoints](code-patterns.md#connector-communication) for OpenAI compatibility guidance.
 
 ---
 
@@ -522,4 +522,4 @@ def add_feature():
 
 **Required fix:** Add usage examples, docstrings.
 
-**Cross-ref:** See [Documentation Blockers](review-execution.md#documentation-blockers) for blocking issues.
+**Cross-ref:** See [Comment Style](review-execution.md#comment-style) for review comment guidance.

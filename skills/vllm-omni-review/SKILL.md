@@ -101,19 +101,19 @@ List non-blocking suggestions and proceed to Step 3.
 
 Use the title prefix and changed directories to decide whether a domain skill is required.
 
-| Signal | Action |
-|--------|--------|
-| `[Image]`, `[ImageGen]` | Use `vllm-omni-image-gen` |
-| `[Video]`, `[VideoGen]` | Use `vllm-omni-video-gen` |
-| `[Audio]`, `[TTS]` | Use `vllm-omni-audio-tts` |
-| `[Multimodal]` | Use `vllm-omni-multimodal` |
-| `[Distributed]` | Use `vllm-omni-distributed` |
-| `[Quantization]` | Use `vllm-omni-quantization` |
-| `[Performance]` | Use `vllm-omni-perf` |
-| `[Hardware]` or backend-specific code | Use `vllm-omni-hardware` |
-| `[API]` or `vllm_omni/entrypoints/` changes | Use `vllm-omni-api` |
-| `[CI]` | Use `vllm-omni-cicd` |
-| `[Model]` | Use `vllm-omni-contrib` |
+| Signal                                      | Action                       |
+| ------------------------------------------- | ---------------------------- |
+| `[Image]`, `[ImageGen]`                     | Use `vllm-omni-image-gen`    |
+| `[Video]`, `[VideoGen]`                     | Use `vllm-omni-video-gen`    |
+| `[Audio]`, `[TTS]`                          | Use `vllm-omni-audio-tts`    |
+| `[Multimodal]`                              | Use `vllm-omni-multimodal`   |
+| `[Distributed]`                             | Use `vllm-omni-distributed`  |
+| `[Quantization]`                            | Use `vllm-omni-quantization` |
+| `[Performance]`                             | Use `vllm-omni-perf`         |
+| `[Hardware]` or backend-specific code       | Use `vllm-omni-hardware`     |
+| `[API]` or `vllm_omni/entrypoints/` changes | Use `vllm-omni-api`          |
+| `[CI]`                                      | Use `vllm-omni-cicd`         |
+| `[Model]`                                   | Use `vllm-omni-contrib`      |
 
 For multi-skill routing and hardware detection, see [references/review-routing.md](references/review-routing.md).
 
@@ -121,11 +121,12 @@ For multi-skill routing and hardware detection, see [references/review-routing.m
 
 Load targeted references based on the diff:
 
-| Diff Area | Load |
-|-----------|------|
-| `vllm_omni/engine/`, `vllm_omni/stages/`, `vllm_omni/connectors/`, `vllm_omni/diffusion/` | [references/pitfalls.md](references/pitfalls.md) |
-| Async, distributed coordination, validation, connector behavior | [references/code-patterns.md](references/code-patterns.md) |
-| Scheduler, stage boundaries, execution model, critical paths | [references/architecture.md](references/architecture.md) |
+| Diff Area                                                                                 | Load                                                       |
+| ----------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `vllm_omni/engine/`, `vllm_omni/stages/`, `vllm_omni/connectors/`, `vllm_omni/diffusion/` | [references/pitfalls.md](references/pitfalls.md)           |
+| Async, distributed coordination, validation, connector behavior                           | [references/code-patterns.md](references/code-patterns.md) |
+| Scheduler, stage boundaries, execution model, critical paths                              | [references/architecture.md](references/architecture.md)   |
+| High-risk changes (core logic, configs/params, error handling, concurrency/distributed, I/O) or `[Feature]` / `[Bugfix]` PRs | [references/tests-docs-checklist.md](references/tests-docs-checklist.md) |
 
 Avoid loading all three by default.
 
@@ -197,6 +198,150 @@ Fetch more context when:
 - The PR appears to rely on prior design discussion
 
 Keep additional fetches narrow and tied to a specific uncertainty.
+
+## Diffusion Model PR Review
+
+> **Invoked when PR prefix is `[Model]`, `[New Model]`, `[Image]`, `[ImageGen]`, `[Video]`, `[VideoGen]`, or `[Diffusion]`.**
+
+All four dimensions below must pass before approving. Work through them in priority order. See [references/diffusion-checklist.md](references/diffusion-checklist.md) for full per-item criteria across all dimensions.
+
+### Priority Order
+
+1. **PR body evidence** — missing samples/metrics block the entire review
+2. **Missing inference mode** — model must work offline and online
+3. **Missing acceleration feature** — required for all new diffusion models
+4. **Missing memory optimization** — required for all new diffusion models
+5. **Missing documentation** — tables and examples must be updated
+6. **Missing e2e test** — required for merge gate
+7. **Missing offline inference test** — recommended; required only when no e2e test is present
+8. **Combined feature test** — required when two or more acceleration/memory features are implemented
+
+---
+
+### Dimension 1: PR Body Completeness
+
+Required: generation script, sample outputs, e2e latency, peak VRAM. Recommended: matching diffusers baseline for all four.
+
+**Comment when required items are missing:**
+
+```
+🔴 **PR Body Incomplete — Required Evidence Missing**
+
+The following items are required before this PR can be reviewed:
+
+- [ ] vLLM-Omni generation script (offline `Omni` or online `vllm serve`)
+- [ ] Generated sample output (image / video / audio)
+- [ ] vLLM-Omni e2e latency (hardware: GPU model, count; resolution; steps)
+- [ ] vLLM-Omni peak VRAM usage (GB)
+
+Please update the PR description with this information.
+```
+
+**Comment when diffusers baseline is absent:**
+
+```
+💡 **Recommended: diffusers Baseline Comparison**
+
+Adding a diffusers comparison would strengthen this PR:
+
+- diffusers generation script (same prompt, same resolution/steps)
+- diffusers sample output
+- diffusers e2e latency vs vLLM-Omni latency
+- diffusers peak VRAM vs vLLM-Omni VRAM
+```
+
+---
+
+### Dimension 2: Code Review
+
+```bash
+# Detect leftover diffusers mixins
+gh pr diff <pr_number> --repo vllm-project/vllm-omni \
+  | grep '^\+' | grep -E 'DiffusionPipelineMixin|SchedulerMixin|ConfigMixin'
+
+# Check acceleration features
+gh pr diff <pr_number> --repo vllm-project/vllm-omni \
+  | grep -iE 'sequence_parallel|cfg_parallel|vae_patch_parallel|tensor_parallel|teacache|cache_dit'
+
+# Check memory optimizations
+gh pr diff <pr_number> --repo vllm-project/vllm-omni \
+  | grep -iE 'cpu_offload|offload_to_cpu|quantization|int8|fp8|bitsandbytes|vae_tiling'
+```
+
+**2.1 Inference modes** — both offline (`Omni`) and online (`vllm serve` / `AsyncOmni`) must be implemented.
+
+```
+🔴 Missing <offline inference / online serving> support. The model must work in both
+Omni (offline) and vllm serve / AsyncOmni (online) modes before merging.
+```
+
+**2.2 Diffusers mixin cleanup** — flag any mixin still present in `+` lines.
+
+```
+🔴 Leftover diffusers mixin detected: `<MixinName>` in `<file>:<line>`.
+Remove diffusers mixins and use vLLM-Omni's native abstractions instead.
+```
+
+**2.3 Acceleration features** — at least one of: sequence parallel, CFG parallel, VAE patch parallel, tensor parallel, TeaCache/step cache.
+
+```
+🔴 No acceleration feature detected. The model must support at least one of:
+sequence parallel, CFG parallel, VAE patch parallel, tensor parallel, or step caching (TeaCache).
+```
+
+**2.4 Memory optimization** — at least one of: CPU offload, quantization (int8/fp8/bnb), VAE tiling.
+
+```
+🔴 No memory optimization feature detected. The model must support at least one of:
+CPU offload (`--cpu-offload-gb`), quantization (int8/fp8/bnb), or VAE tiling.
+```
+
+---
+
+### Dimension 3: Documentation
+
+```bash
+gh pr view <pr_number> --repo vllm-project/vllm-omni \
+  --json files --jq '.files[].path' | grep -E 'docs/|\.md$'
+```
+
+Required: model support table, feature support table, usage example doc (offline + online).
+
+```
+🔴 Documentation incomplete:
+- [ ] Model support table not updated (docs/models/supported_models.md or equivalent)
+- [ ] Feature support table not updated
+- [ ] Usage example doc missing or not updated for <ModelName>
+```
+
+---
+
+### Dimension 4: Test Coverage
+
+```bash
+gh pr view <pr_number> --repo vllm-project/vllm-omni \
+  --json files --jq '.files[].path' | grep -E '^tests/'
+```
+
+Required: e2e online serving test. Recommended: offline inference test. Required when 2+ features: combined feature test.
+
+```
+🔴 Missing e2e online serving test in `tests/e2e/online_serving/`.
+Please add a test that:
+1. Starts `vllm serve <model> --omni`
+2. Sends a generation request via the API
+3. Asserts the response contains a valid image / video / audio output
+```
+
+```
+⚠️ Multiple features are implemented (e.g., <feature A> + <feature B>) but no combined
+feature test is present. Please add a test (or extend the e2e test) that enables both
+features together and asserts output validity + reports latency + VRAM.
+```
+
+> See [Diffusion Checklist](references/diffusion-checklist.md) for full per-item criteria and the Quick Red Flags summary.
+
+---
 
 ## References
 
